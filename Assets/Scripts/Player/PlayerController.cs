@@ -81,6 +81,11 @@ public class PlayerController : MonoBehaviour
         {
             StartCoroutine(VulnerableFix());
         }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
     }
 
     private void FixedUpdate()
