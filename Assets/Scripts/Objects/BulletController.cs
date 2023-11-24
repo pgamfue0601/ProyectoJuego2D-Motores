@@ -47,7 +47,6 @@ public class BulletController : MonoBehaviour
                     PlayerController player = GameObject.Find("player").GetComponent<PlayerController>();
                     player.disparando = true;
                     player.ganado = true;
-                    StartCoroutine(collision.gameObject.GetComponent<BossController>().FinBoss());
                 }
                 else
                 {

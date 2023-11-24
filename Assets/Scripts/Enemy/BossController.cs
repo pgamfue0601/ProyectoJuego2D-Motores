@@ -19,7 +19,7 @@ public class BossController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        vidas = 3;
+        vidas = 5;
         vulnerable = true;
         start = false;
         eliminado = false;
@@ -30,14 +30,23 @@ public class BossController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (start && !eliminado)
+        if (start)
         {
-            StartCoroutine(BossFight());
+            if (!eliminado)
+            {
+                StartCoroutine(BossFight());
+            }
+        }
+
+        if (vidas < 1)
+        {
+            StartCoroutine(FinBoss());
         }
     }
 
     private IEnumerator BossFight()
     {
+        Debug.Log("Ejecutando");
         start = false;
         rb.AddForce(Vector2.up * 8, ForceMode2D.Impulse);
         yield return new WaitForSeconds(2f);
@@ -86,6 +95,7 @@ public class BossController : MonoBehaviour
 
     public IEnumerator QuitaVida(Collider2D collision)
     {
+        StopCoroutine(BossFight());
         collision.GetComponent<SpriteRenderer>().color = Color.red;
         yield return new WaitForSeconds(2.2f);
         collision.GetComponent<BossController>().vulnerable = true;
@@ -103,16 +113,21 @@ public class BossController : MonoBehaviour
 
     public IEnumerator FinBoss()
     {
-        spriteRenderer.color = Color.red;
-        GameObject.Find("player").GetComponent<PlayerController>().ganado = true;
-        GameObject.Find("player").GetComponent<PlayerController>().disparando = true;
-        start = false;
-        music.Stop();
-        deathScream.Play();
-        yield return new WaitForSeconds(2f);
-        spriteRenderer.enabled = false;
-        winner.Play();
-        yield return new WaitForSeconds(5f);
-        SceneManager.LoadScene("MainMenu");
+        if (!eliminado)
+        {
+            StopCoroutine(BossFight());
+            spriteRenderer.color = Color.red;
+            GameObject.Find("player").GetComponent<PlayerController>().ganado = true;
+            GameObject.Find("player").GetComponent<PlayerController>().disparando = true;
+            start = false;
+            eliminado = true;
+            music.Stop();
+            deathScream.Play();
+            yield return new WaitForSeconds(2f);
+            spriteRenderer.enabled = false;
+            winner.Play();
+            yield return new WaitForSeconds(9f);
+            SceneManager.LoadScene("MainMenu");
+        }
     }
 }
