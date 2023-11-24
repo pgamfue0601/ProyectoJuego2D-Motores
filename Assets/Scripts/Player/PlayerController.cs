@@ -72,7 +72,10 @@ public class PlayerController : MonoBehaviour
         }
         Flip();
         TiempoEmpleado();
-        CheatsSkip();
+        if (!ganado)
+        { 
+            CheatsSkip();
+        }
 
         if (!vulnerable)
         {
