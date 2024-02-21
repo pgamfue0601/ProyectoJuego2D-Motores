@@ -56,6 +56,7 @@ public class PlayerController : MonoBehaviour
         hudController.SetBalas(disparos);
         hudController.SetMonedas(coinCounter);
     }
+    
 
     // Update is called once per frame
     void Update()
@@ -95,7 +96,7 @@ public class PlayerController : MonoBehaviour
         {
             return;
         }
-#if UNITY_ANDROID
+#if UNITY_ANDROID || UNITY_IOS
         if (moverseDerecha)
         {
             fisicas.velocity = new Vector3(1 * velocidad, fisicas.velocity.y);

@@ -15,7 +15,7 @@ public class AndroidScript : MonoBehaviour
     {
         gameObject.SetActive(false);
 
-        #if UNITY_ANDROID
+        #if UNITY_ANDROID || UNITY_IOS
             gameObject.SetActive(true);
         #endif
 
