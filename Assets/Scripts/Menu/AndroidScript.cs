@@ -24,17 +24,19 @@ public class AndroidScript : MonoBehaviour
 
     public void MoverseDerecha()
     {
-        player.fisicas.velocity = new Vector3(1 * player.velocidad, player.fisicas.velocity.y);
+        player.moverseDerecha = true;
     }
 
     public void MoverseIzquierda()
     {
-        player.fisicas.velocity = new Vector3(-1 * player.velocidad, player.fisicas.velocity.y);
+        player.moverseIzquierda = true;
     }
 
     public void StopMoverse()
     {
-        player.fisicas.velocity = new Vector3(0 * player.velocidad, player.fisicas.velocity.y);
+        
+        player.moverseDerecha = false;
+        player.moverseIzquierda = false;
     }
 
     public void Saltar()

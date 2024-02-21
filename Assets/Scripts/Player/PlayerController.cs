@@ -9,7 +9,7 @@ public class PlayerController : MonoBehaviour
     public int velocidad;
     public float fuerzaSalto;
     public Rigidbody2D fisicas;
-    float entradaX = 0f;
+    public float entradaX = 0f;
     public SpriteRenderer spriteRenderer;
     private Animator animator;
     public int coinCounter, disparos, vidas;
@@ -22,6 +22,7 @@ public class PlayerController : MonoBehaviour
     private GameData datosJuego;
     public bool sueloForzado;
     private bool dataReceived;
+    public bool moverseIzquierda, moverseDerecha;
     // Start is called before the first frame update
     void Start()
     {
@@ -94,7 +95,22 @@ public class PlayerController : MonoBehaviour
         {
             return;
         }
-        fisicas.velocity = new Vector3(entradaX * velocidad, fisicas.velocity.y);
+#if UNITY_ANDROID
+        if (moverseDerecha)
+        {
+            fisicas.velocity = new Vector3(1 * velocidad, fisicas.velocity.y);
+        }
+        else if (moverseIzquierda)
+        {
+            fisicas.velocity = new Vector3(-1 * velocidad, fisicas.velocity.y);
+        } else
+        {
+            fisicas.velocity = new Vector3(0 * velocidad, fisicas.velocity.y);
+        }
+#else
+            fisicas.velocity = new Vector3(entradaX * velocidad, fisicas.velocity.y);
+#endif
+
     }
 
     private void TiempoEmpleado()
