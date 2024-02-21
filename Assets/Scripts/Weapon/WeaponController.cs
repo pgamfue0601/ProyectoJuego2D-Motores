@@ -28,7 +28,7 @@ public class WeaponController : MonoBehaviour
         }
     }
 
-    private void shoot()
+    public void shoot()
     {
         if (playerController.disparos > 0 && playerController.disparando == false)
         {
