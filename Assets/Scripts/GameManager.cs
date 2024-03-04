@@ -17,8 +17,8 @@ public class GameManager : MonoBehaviour
     {
         foreach (Button button in adsButtons)
         {
-            button.GetComponent<RewardAds>().LoadAd();
-            button.GetComponent<RewardAds>().OnUnityAdsAdLoaded("Anuncio1");
+            //button.GetComponent<RewardAds>().LoadAd();
+            //button.GetComponent<RewardAds>().OnUnityAdsAdLoaded("Anuncio1");
         }
     }
 

@@ -1,87 +1,130 @@
+using System;
+using System.Collections;
+using UnityEngine.Advertisements;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Advertisements;
+using TMPro;
 
-public class RewardAds : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowListener
+public class RewardAds : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoadListener, IUnityAdsShowListener
 {
-    [SerializeField] Button _showAdButton;
-    [SerializeField] string _androidAdUnitId = "Anuncio1";
-    [SerializeField] string _iOSAdUnitId = "Rewarded_iOS";
-    string _adUnitId = null; // This will remain null for unsupported platforms
+    private string GAME_ID = "5556603"; //replace with your gameID from dashboard. note: will be different for each platform.
+    private const string VIDEO_PLACEMENT = "Anuncio1";
+    public bool testMode = true;
+    public Text t_msj;
+    public Text t_puntos;
+    private int PUNTOS = 0;
+    private bool is_init = false;
+    private bool is_load = false;
 
-    void Awake()
+
+    //utility wrappers for debuglog
+    public delegate void DebugEvent(string msg);
+    public static event DebugEvent OnDebugLog;
+
+    public void Initialize()
     {
-        // Get the Ad Unit ID for the current platform:
-#if UNITY_IOS
-        _adUnitId = _iOSAdUnitId;
-#elif UNITY_ANDROID
-        _adUnitId = _androidAdUnitId;
-#endif
-
-        // Disable the button until the ad is ready to show:
-        _showAdButton.interactable = false;
-    }
-
-    // Call this public method when you want to get an ad ready to show.
-    public void LoadAd()
-    {
-        // IMPORTANT! Only load content AFTER initialization (in this example, initialization is handled in a different script).
-        Debug.Log("Loading Ad: " + _adUnitId);
-        Advertisement.Load(_adUnitId, this);
-    }
-
-    // If the ad successfully loads, add a listener to the button and enable it:
-    public void OnUnityAdsAdLoaded(string adUnitId)
-    {
-        Debug.Log("Ad Loaded: " + adUnitId);
-
-        if (adUnitId.Equals(_adUnitId))
+        if (!is_init)
         {
-            // Configure the button to call the ShowAd() method when clicked:
-            _showAdButton.onClick.AddListener(ShowAd);
-            // Enable the button for users to click:
-            _showAdButton.interactable = true;
+            if (Advertisement.isSupported)
+            {
+                DebugLog(Application.platform + " supported by Advertisement");
+            }
+            else
+            {
+                t_msj.text = "No está soportado el sistema UnityAds.";
+            }
+            t_msj.text = "Inicializando... Espere, por favor.";
+            Advertisement.Initialize(GAME_ID, testMode, this);
+        }
+        else{
+            t_msj.text = "Sistema inicializado correctamente";
         }
     }
 
-    // Implement a method to execute when the user clicks the button:
-    public void ShowAd()
+    public void LoadNonRewardedAd()
     {
-        // Disable the button:
-        _showAdButton.interactable = false;
-        // Then show the ad:
-        Advertisement.Show(_adUnitId, this);
-    }
-
-    // Implement the Show Listener's OnUnityAdsShowComplete callback method to determine if the user gets a reward:
-    public void OnUnityAdsShowComplete(string adUnitId, UnityAdsShowCompletionState showCompletionState)
-    {
-        if (adUnitId.Equals(_adUnitId) && showCompletionState.Equals(UnityAdsShowCompletionState.COMPLETED))
-        {
-            Debug.Log("Unity Ads Rewarded Ad Completed");
-            // Grant a reward.
+        if (is_init) {
+            Advertisement.Load(VIDEO_PLACEMENT, this);
+        } else {
+            t_msj.text = "Inicializa antes de cargar";
         }
     }
 
-    // Implement Load and Show Listener error callbacks:
-    public void OnUnityAdsFailedToLoad(string adUnitId, UnityAdsLoadError error, string message)
+    public void ShowNonRewardedAd()
     {
-        Debug.Log($"Error loading Ad Unit {adUnitId}: {error.ToString()} - {message}");
-        // Use the error details to determine whether to try to load another ad.
+        if (is_load) {
+            Advertisement.Show(VIDEO_PLACEMENT, this);
+        }
+        else {
+            t_msj.text = "Carga antes de mostrar.";
+        }
     }
 
-    public void OnUnityAdsShowFailure(string adUnitId, UnityAdsShowError error, string message)
+    #region Interface Implementations
+    public void OnInitializationComplete()
     {
-        Debug.Log($"Error showing Ad Unit {adUnitId}: {error.ToString()} - {message}");
-        // Use the error details to determine whether to try to load another ad.
+        DebugLog("Init Success");
+        t_msj.text = "Sistema inicializado correctamente";
+        is_init = true;
     }
 
-    public void OnUnityAdsShowStart(string adUnitId) { }
-    public void OnUnityAdsShowClick(string adUnitId) { }
-
-    void OnDestroy()
+    public void OnInitializationFailed(UnityAdsInitializationError error, string message)
     {
-        // Clean up the button listeners:
-        _showAdButton.onClick.RemoveAllListeners();
+        DebugLog($"Init Failed: [{error}]: {message}");
+        t_msj.text = "ERROR: No se puede inicializar.";
+        is_init = false;
+    }
+
+    public void OnUnityAdsAdLoaded(string placementId)
+    {
+        DebugLog($"Load Success: {placementId}");
+        t_msj.text = "Anuncio cargado. Pulse mostrar para ve el anuncio.";
+        is_load = true;
+    }
+
+    public void OnUnityAdsFailedToLoad(string placementId, UnityAdsLoadError error, string message)
+    {
+        DebugLog($"Load Failed: [{error}:{placementId}] {message}");
+        t_msj.text = "ERROR: No se puede cargar el anuncio.";
+        is_load = false;
+    }
+
+    public void OnUnityAdsShowFailure(string placementId, UnityAdsShowError error, string message)
+    {
+        DebugLog($"OnUnityAdsShowFailure: [{error}]: {message}");
+        t_msj.text = "ERROR: No se puede mostrar el anuncio";
+    }
+
+    public void OnUnityAdsShowStart(string placementId)
+    {
+        t_msj.text = "Mostrando anuncio...";
+        DebugLog($"OnUnityAdsShowStart: {placementId}");
+    }
+
+    public void OnUnityAdsShowClick(string placementId)
+    {
+        DebugLog($"OnUnityAdsShowClick: {placementId}");
+    }
+
+    public void OnUnityAdsShowComplete(string placementId, UnityAdsShowCompletionState showCompletionState)
+    {
+        if ($"{showCompletionState}" == "SKIPPED"){
+            t_msj.text = "Lo siento, para obtener una vida mira el anuncio completamente";
+        }
+        if ($"{showCompletionState}" == "COMPLETED"){
+            PUNTOS++;
+            t_puntos.text = "Puntos: " + PUNTOS;
+            t_msj.text = "Enhorabuena... Has ganado una vida";
+        }
+        is_load = false;
+        DebugLog($"OnUnityAdsShowComplete: [{showCompletionState}]: {placementId}");
+    }
+    #endregion
+
+     //wrapper around debug.log to allow broadcasting log strings to the UI
+    void DebugLog(string msg)
+    {
+        OnDebugLog?.Invoke(msg);
+        Debug.Log(msg);
     }
 }
